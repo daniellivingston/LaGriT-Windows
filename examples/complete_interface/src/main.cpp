@@ -3,7 +3,8 @@
 int main(int argc, char* argv) {
 
     std::cout << "Initializing...\n";
-    Lagrit::initialize(true);
+    //Lagrit::initialize();
+    Lagrit::initialize(true, "logfile.txt", "batchfile.txt");
 
     std::cout << "Sending command...\n";
     Lagrit::sendCommand("cmo/create/mo1///hex");

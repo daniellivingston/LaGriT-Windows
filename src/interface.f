@@ -103,7 +103,9 @@ C     void *sendbuf -> TYPE(C_PTR), VALUE :: sendbuf
             implicit none
 
             character*(*), intent(in) :: ioption, cmo_name
-            real(kind=8), dimension(*), intent(out) :: data_out
+            !real(kind=8), dimension(*), intent(out) :: data_out
+            !integer(c_int), intent(out) :: data_out
+            type(c_ptr), intent(out) :: data_out
             integer(c_int), intent(out) :: lout, itype
 
             character(len=200) :: ioption_f, cmo_name_f
@@ -126,8 +128,39 @@ C     void *sendbuf -> TYPE(C_PTR), VALUE :: sendbuf
 
             itype = itype_f
             lout = lout_f
+            data_out = c_loc(v_out)
+
+            !print*,'data_out = ',data_out
 
             cmo_get_info_c = ierror
+          end function
+
+          integer function initlagrit_c
+     &    (mode_c, log_file_c, batch_file_c)
+            use, intrinsic :: iso_c_binding
+            implicit none
+
+            character*(*), intent(in) ::
+     &      mode_c, log_file_c, batch_file_c
+
+            character(len=500) :: 
+     &      mode, log_file, batch_file
+
+            print*,'MODE = '
+            print*,'>',mode_c,'<'
+            print*,'LOG = '
+            print*,'>',log_file_c,'<'
+            print*,'BATCH = '
+            print*,'>',batch_file_c,'<'
+
+            call C_to_F_string(mode_c, mode)
+            call C_to_F_string(log_file_c, log_file)
+            call C_to_F_string(batch_file_c, batch_file)
+
+            call initlagrit(mode, log_file, batch_file)
+
+            initlagrit_c = 1
+
           end function
 
 ! ================================================================ !
@@ -135,6 +168,14 @@ C     void *sendbuf -> TYPE(C_PTR), VALUE :: sendbuf
 
       module c2f_interface
         interface
+
+          integer(kind=c_int) function initlagrit_c
+     &      (mode_c, log_file_c, batch_file_c)
+     &      bind(C, name="initlagrit_c")
+            use, intrinsic :: iso_c_binding
+            character*(*), intent(in) ::
+     &      mode_c, log_file_c, batch_file_c
+          end function
 
           subroutine initlagrit(mode, log_file, batch_file) 
      &    bind(C, name="initlagrit")

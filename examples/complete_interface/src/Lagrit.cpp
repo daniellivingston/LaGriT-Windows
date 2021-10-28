@@ -70,11 +70,14 @@ namespace Lagrit {
         strcpy(ioption_c, ioption.c_str());
 
         //double xvec[mesh->numNodes()];
-        double *xvec = (double *) malloc(mesh->numNodes() * sizeof(double));
+        //double *xvec = (double *) malloc(mesh->numNodes() * sizeof(double));
+
+        //void* ptr = NULL;
+        int ptr = NULL;
 
         int ierr = CMO_GET_INFO_C(
             ioption_c, cmo_c,
-            xvec, &lout, &itype,
+            &ptr, &lout, &itype,
             strlen(ioption_c), strlen(cmo_c)
         );
 
@@ -85,31 +88,42 @@ namespace Lagrit {
             std::cerr << "ERROR: " << cmo_c << "; " << ioption_c << std::endl;
         }
 
-        free(xvec);
+        //free(xvec);
 
         return ierr;
     }
 
-    int initialize(bool noisy) {
-        char *mode;
-        char *log_file = " ";
-        char *batch_file = " ";
+
+    int initialize(bool noisy, std::string log_file, std::string batch_file) {
+        std::string mode;
 
         if (noisy) {
-            mode = "noisy";
+            mode = "noisy ";
         } else {
-            mode = "quiet";
+            mode = "silent ";
         }
 
-        INITLAGRIT(
-            mode,
-            log_file,
-            batch_file,
-            strlen(mode),
-            strlen(log_file),
-            strlen(batch_file)
+        int ierr = INITLAGRIT_C(
+            mode.c_str(),
+            log_file.c_str(),
+            batch_file.c_str(),
+            mode.size(),
+            log_file.size(),
+            batch_file.size()
+            //strlen(mode),
+            //strlen(log_file),
+            //strlen(batch_file)
         );
+
         return 0;
+    }
+
+    int initialize(bool noisy) {
+        return initialize(noisy, " ", " ");
+    }
+
+    int initialize() {
+        return initialize(true);
     }
 
     int sendCommand(std::string cmd) {

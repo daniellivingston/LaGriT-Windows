@@ -6,11 +6,11 @@
 
 #define MAX_STR_LEN 100
 
-extern "C" void INITLAGRIT(char [], char [], char [], unsigned int, unsigned int, unsigned int);
+extern "C" int INITLAGRIT_C(const char[], const char[], const char[], unsigned int, unsigned int, unsigned int);
 extern "C" int DOTASK_C(char [], unsigned int);
 extern "C" int CMO_GET_NAME_C(char [], unsigned int);
 //extern "C" void CMO_GET_INFO(char [], char [], double**, int*, int*, int*, unsigned int, unsigned int);
-extern "C" int CMO_GET_INFO_C(char [], char [], double*, int*, int*, unsigned int, unsigned int);
+extern "C" int CMO_GET_INFO_C(char [], char [], int*, int*, int*, unsigned int, unsigned int);
 extern "C" int CMO_GET_INTINFO_C(char [], char [], int*, int*, int*, unsigned int, unsigned int);
 
 namespace Lagrit {
@@ -71,7 +71,10 @@ private:
     std::string name;
 };
 
+int initialize();
 int initialize(bool noisy);
+int initialize(bool noisy, std::string log_file, std::string batch_file);
+
 int sendCommand(std::string cmd);
 Mesh getActiveMesh();
 

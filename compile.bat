@@ -45,7 +45,7 @@ echo CONFIGURING LAGRIT FOR BUILDING
 echo ============================================
 echo ""
 
-rmdir /S /Q build
+: rmdir /S /Q build
 cmake -G "NMake Makefiles" -B "build" || goto END
 
 : cmake -G "Visual Studio 16 2019" -A x86 -B "build" || goto END
@@ -64,9 +64,8 @@ echo TESTING LAGRIT
 echo ============================================
 echo ""
 
-cd ..\test
-python suite.py -f -l=1 -exe=..\build\lagrit.exe -hf=3
-: python suite.py -s=level01/sort -exe=..\build\lagrit.exe
+: cd ..\test
+: python suite.py -f -l=1 -exe=..\build\lagrit.exe -hf=3
 
 goto END
 

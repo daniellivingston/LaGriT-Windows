@@ -54,7 +54,7 @@ echo ============================================
 echo ""
 
 rmdir /S /Q build
-cmake -G "NMake Makefiles" -B "build" || goto END
+cmake -G "NMake Makefiles" -B "build" -DCMAKE_BUILD_TYPE=Debug || goto END
 cd build
 
 nmake || goto END
