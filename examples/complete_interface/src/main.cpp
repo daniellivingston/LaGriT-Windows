@@ -22,9 +22,14 @@ int main(int argc, char* argv) {
 
     std::cout << "Num. nodes: " << num_nodes << "; num. cells: " << num_cells << std::endl;
 
-    std::cout << "Getting X vector...\n";
-
-    double *x_vec = mo.getX();
+    std::cout << "Mesh Nodes:\n";
+    Lagrit::Nodes mo_nodes = mo.getNodes();
+    for (size_t i = 0; i < mo_nodes.size; ++i) {
+        double x = mo_nodes.x[i];
+        double y = mo_nodes.y[i];
+        double z = mo_nodes.z[i];
+        std::cout << "i = " << i << "; xyz = (" << x << ", " << y << ", " << z << ")" << std::endl;
+    }
 
     std::cout << "FINISHED." << std::endl;
 

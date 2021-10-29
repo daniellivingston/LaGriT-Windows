@@ -2,6 +2,13 @@
 
 namespace Lagrit {
 
+    Nodes::Nodes(int size_, double* x_, double* y_, double* z_) {
+        size = size_;
+        x = x_;
+        y = y_;
+        z = z_;
+    }
+
     Mesh::Mesh() {}
     Mesh::Mesh(std::string name_) {
         name = name_;
@@ -28,10 +35,28 @@ namespace Lagrit {
         return GetIntInfo(this, MeshIntOptions::numCells);
     }
 
-    double* Mesh::getX() {
-        double xxx = 1;
-        int xic = GetInfo(this, MeshOptions::xVector);
-        return &xxx;
+    double* Mesh::nodesX() {
+        void* data_ptr = GetInfo(this, MeshOptions::GetInfoOpts::xVector);
+        return (double *)data_ptr;
+    }
+
+    double* Mesh::nodesY() {
+        void* data_ptr = GetInfo(this, MeshOptions::GetInfoOpts::yVector);
+        return (double *)data_ptr;
+    }
+
+    double* Mesh::nodesZ() {
+        void* data_ptr = GetInfo(this, MeshOptions::GetInfoOpts::zVector);
+        return (double *)data_ptr;
+    }
+
+    Nodes Mesh::getNodes() {
+        int num_nodes = this->numNodes();
+        double* x_ptr = this->nodesX();
+        double* y_ptr = this->nodesY();
+        double* z_ptr = this->nodesZ();
+
+        return Nodes(num_nodes, x_ptr, y_ptr, z_ptr);
     }
 
     // https://docs.oracle.com/cd/E19205-01/819-5262/6n7bvdr18/
@@ -59,7 +84,7 @@ namespace Lagrit {
         return iout;
     }
 
-    int GetInfo(Mesh *mesh, const std::string ioption) {
+    void* GetInfo(Mesh *mesh, const std::string ioption) {
         char cmo_c[MAX_STR_LEN];
         char ioption_c[MAX_STR_LEN];
 
@@ -69,28 +94,33 @@ namespace Lagrit {
         strcpy(cmo_c, (mesh->getName()).c_str());
         strcpy(ioption_c, ioption.c_str());
 
-        //double xvec[mesh->numNodes()];
-        //double *xvec = (double *) malloc(mesh->numNodes() * sizeof(double));
-
-        //void* ptr = NULL;
-        int ptr = NULL;
+        void* data_ptr = NULL;
 
         int ierr = CMO_GET_INFO_C(
             ioption_c, cmo_c,
-            &ptr, &lout, &itype,
+            &data_ptr, &lout, &itype,
             strlen(ioption_c), strlen(cmo_c)
         );
 
-        std::cout << "DONE WITH GET INFO\n";
-        std::cout << "itype = " << itype << "; lout = " << lout << std::endl;
-
-        if (ierr != 0) {
+        if (ierr != 0 || NULL == data_ptr) {
             std::cerr << "ERROR: " << cmo_c << "; " << ioption_c << std::endl;
         }
+
+        return data_ptr;
+
+/*
+        std::cout << "hello :)\n";
+        double hello = *((double *) data_ptr);
+        std::cout << hello << std::endl;
+
+        double* hello2 = (double *) data_ptr;
+        std::cout << hello2[0] << std::endl;
+        std::cout << ":)\n";
 
         //free(xvec);
 
         return ierr;
+        */
     }
 
 
@@ -98,9 +128,9 @@ namespace Lagrit {
         std::string mode;
 
         if (noisy) {
-            mode = "noisy ";
+            mode = "noisy";
         } else {
-            mode = "silent ";
+            mode = "silent";
         }
 
         int ierr = INITLAGRIT_C(
@@ -110,12 +140,9 @@ namespace Lagrit {
             mode.size(),
             log_file.size(),
             batch_file.size()
-            //strlen(mode),
-            //strlen(log_file),
-            //strlen(batch_file)
         );
 
-        return 0;
+        return ierr;
     }
 
     int initialize(bool noisy) {

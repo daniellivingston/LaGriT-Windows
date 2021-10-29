@@ -97,14 +97,11 @@ C     void *sendbuf -> TYPE(C_PTR), VALUE :: sendbuf
 ! ================================================================ !
 
           integer function cmo_get_info_c
-!     &    (ioption, cmo_name, ipout, lout, itype)
      &    (ioption, cmo_name, data_out, lout, itype)
             use, intrinsic :: iso_c_binding
             implicit none
 
             character*(*), intent(in) :: ioption, cmo_name
-            !real(kind=8), dimension(*), intent(out) :: data_out
-            !integer(c_int), intent(out) :: data_out
             type(c_ptr), intent(out) :: data_out
             integer(c_int), intent(out) :: lout, itype
 
@@ -124,13 +121,9 @@ C     void *sendbuf -> TYPE(C_PTR), VALUE :: sendbuf
      &        itype_f, ierror
      &      )
 
-            print*, 'vector = ', v_out(1:15)
-
             itype = itype_f
             lout = lout_f
-            data_out = c_loc(v_out)
-
-            !print*,'data_out = ',data_out
+            data_out = c_loc(v_out(1))
 
             cmo_get_info_c = ierror
           end function
@@ -146,20 +139,13 @@ C     void *sendbuf -> TYPE(C_PTR), VALUE :: sendbuf
             character(len=500) :: 
      &      mode, log_file, batch_file
 
-            print*,'MODE = '
-            print*,'>',mode_c,'<'
-            print*,'LOG = '
-            print*,'>',log_file_c,'<'
-            print*,'BATCH = '
-            print*,'>',batch_file_c,'<'
-
             call C_to_F_string(mode_c, mode)
             call C_to_F_string(log_file_c, log_file)
             call C_to_F_string(batch_file_c, batch_file)
 
             call initlagrit(mode, log_file, batch_file)
 
-            initlagrit_c = 1
+            initlagrit_c = 0
 
           end function
 
@@ -222,15 +208,15 @@ C     void *sendbuf -> TYPE(C_PTR), VALUE :: sendbuf
 ! ================================================================ !
 
           integer function cmo_get_info_c
-!     &    (ioption, cmo_name, ipout, lout, itype)
      &    (ioption, cmo_name, data_out, lout, itype)
      &    bind(C, name="cmo_get_info_c")
             use, intrinsic :: iso_c_binding
             implicit none
+
             character(kind=c_char), dimension(*), intent(in) ::
      &      ioption, cmo_name
             integer(c_int), intent(out) :: lout, itype
-            real(kind=8), dimension(*), intent(out) :: data_out
+            type(c_ptr), intent(out) :: data_out
           end function
 
 C=========== BEGIN ANOTHERMATBLD3D DECLARATIONS ========================
