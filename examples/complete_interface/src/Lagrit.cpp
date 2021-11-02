@@ -2,6 +2,7 @@
 
 namespace Lagrit {
 
+/*
     Nodes::Nodes(int size_, double* x_, double* y_, double* z_) {
         size = size_;
         x = x_;
@@ -14,6 +15,7 @@ namespace Lagrit {
         name = name_;
         // TODO check if mesh exists
     }
+    */
 
     std::string Mesh::getName() {
         return this->name;
@@ -28,11 +30,15 @@ namespace Lagrit {
     }
 
     int Mesh::numNodes() {
-        return GetIntInfo(this, MeshIntOptions::numNodes);
+        return GetIntInfo(this, MeshOptions::GetIntInfoOpts::numNodes);
     }
 
     int Mesh::numCells() {
-        return GetIntInfo(this, MeshIntOptions::numCells);
+        return GetIntInfo(this, MeshOptions::GetIntInfoOpts::numCells);
+    }
+
+    int Mesh::numAttributes() {
+        return GetIntInfo(this, MeshOptions::GetIntInfoOpts::numAttributes);
     }
 
     double* Mesh::nodesX() {
@@ -57,6 +63,80 @@ namespace Lagrit {
         double* z_ptr = this->nodesZ();
 
         return Nodes(num_nodes, x_ptr, y_ptr, z_ptr);
+    }
+
+    Cells Mesh::getCells() {
+        void* data_ptr;
+        int num_cells = this->numCells();
+        int cell_length = GetIntInfo(this, MeshOptions::GetIntInfoOpts::nodesPerCell);
+
+        data_ptr = GetInfo(this, MeshOptions::GetInfoOpts::cellGeometry);
+        int* cell_types = (int *)data_ptr;
+
+        data_ptr = GetInfo(this, MeshOptions::GetInfoOpts::cellConnectivity);
+        int* cell_connectivity = (int *)data_ptr;
+
+        return Cells(num_cells, cell_length, cell_connectivity, cell_types);
+    }
+
+    Attribute Mesh::getAttributeAtIndex(int index) {
+        int length, rank;
+        void* data_ptr;
+        MeshOptions::IType data_type;
+        char* att_name_c;
+
+        int ierr = CMO_GET_ATTRIBUTE_NAME_C(
+            this->getName().c_str(),
+            &index,
+            att_name_c,
+            this->getName().size()
+        );
+
+        std::string att_name(att_name_c);
+
+        return Attribute(att_name, length, rank, data_ptr, data_type);
+    }
+
+    std::vector<Attribute> Mesh::getAttributes() {
+        std::vector<Attribute> attributes;
+        std::string cmo_name = this->getName();
+        unsigned int len_cmo_name = this->getName().size();
+        int ierr;
+        int num_attrs = this->numAttributes();
+
+        for (int i = 0; i < num_attrs; ++i) {
+            attributes.push_back(this->getAttributeAtIndex(i));
+
+            void* data_ptr;
+            int itype, length, rank;
+            std::string att_name = ;
+            unsigned int len_att_name = ;
+            ierr = CMO_GET_LENGTH_C(att_name.c_str(), cmo_name.c_str(),
+                &length, &rank, cmo_name.size(), att_name.size());
+            
+            ierr = CMO_GET_ATTINFO_C(att_name.c_str(), cmo_name.c_str(), &data_ptr, &itype);
+
+            MeshOptions::IType data_type;
+
+            switch (itype) {
+                case 1:
+                    data_type = MeshOptions::IType::integer;
+                    break;
+                case 2:
+                    data_type = MeshOptions::IType::real;
+                    break;
+                case 3:
+                    data_type = MeshOptions::IType::character;
+                    break;
+                case 4:
+                    data_type = MeshOptions::IType::pointer;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return attributes;
     }
 
     // https://docs.oracle.com/cd/E19205-01/819-5262/6n7bvdr18/
@@ -107,23 +187,13 @@ namespace Lagrit {
         }
 
         return data_ptr;
-
-/*
-        std::cout << "hello :)\n";
-        double hello = *((double *) data_ptr);
-        std::cout << hello << std::endl;
-
-        double* hello2 = (double *) data_ptr;
-        std::cout << hello2[0] << std::endl;
-        std::cout << ":)\n";
-
-        //free(xvec);
-
-        return ierr;
-        */
+        //return std::make_pair<void*, MeshOptions::IType>(data_ptr, itype)
     }
 
 
+    /*
+        Initializes LaGriT.
+    */
     int initialize(bool noisy, std::string log_file, std::string batch_file) {
         std::string mode;
 
@@ -153,6 +223,9 @@ namespace Lagrit {
         return initialize(true);
     }
 
+    /*
+        Sends a standard string-based command to LaGriT.
+    */
     int sendCommand(std::string cmd) {
         int ierr = -1;
         const char finish[] = "; finish";
@@ -166,6 +239,9 @@ namespace Lagrit {
         return ierr;
     }
 
+    /*
+        Returns the CMO (current mesh object.)
+    */
     Mesh getActiveMesh() {
         char cmo_c[MAX_STR_LEN];
         int ierr = CMO_GET_NAME_C(cmo_c, MAX_STR_LEN);

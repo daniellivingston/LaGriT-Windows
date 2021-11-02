@@ -33,6 +33,16 @@ C     void *sendbuf -> TYPE(C_PTR), VALUE :: sendbuf
             dotask_c = ierror
           end function
 
+          integer function cmo_create_c(cmo)
+            use, intrinsic :: iso_c_binding
+            implicit none
+            character*(*), intent(in) :: cmo
+            integer :: ierror = 0
+
+            call cmo_create(cmo, ierror)
+            cmo_create_c = ierror
+          end function
+
           integer function cmo_get_name_c(cmo)
             use, intrinsic :: iso_c_binding
             implicit none
@@ -43,6 +53,59 @@ C     void *sendbuf -> TYPE(C_PTR), VALUE :: sendbuf
             cmo = trim(cmo)//c_null_char
 
             cmo_get_name_c = ierror
+          end function
+
+          integer function cmo_release_c(cmo_name)
+            use, intrinsic :: iso_c_binding
+            implicit none
+            character*(*), intent(in) :: cmo_name
+            integer :: ierror = 0
+
+            call cmo_release(cmo_name, ierror)
+            cmo_release_c = ierror
+          end function
+
+          integer function cmo_set_info_c
+     &      (ioption, cmo, data, ierr)
+          end function
+
+          integer function cmo_get_attribute_name_c
+     &      (cmo, index, att_name)
+            use, intrinsic :: iso_c_binding
+            implicit none
+            character*(*), intent(in) :: cmo
+            integer, intent(in) :: index
+            character*(*), intent(out) :: att_name
+            integer :: ierror = 0
+
+            call cmo_get_attribute_name(cmo, index, att_name, ierror)
+            att_name = trim(att_name)//c_null_char
+
+            cmo_get_attribute_name_c = ierror
+          end function
+
+          integer function cmo_newlen_c(cmo)
+            use, intrinsic :: iso_c_binding
+            implicit none
+            character*(*), intent(in) :: cmo
+            integer :: ierror = 0
+
+            call cmo_newlen_c(cmo, ierror)
+            cmo_newlen_c = ierror
+          end function
+
+          integer function cmo_get_length_c
+     &      (att_name, cmo_name, length, irank)
+            use, intrinsic :: iso_c_binding
+            implicit none
+            character*(*), intent(in) :: att_name, cmo_name
+            integer, intent(out) :: length, irank
+            integer :: ierror = 0
+
+            call cmo_get_length(att_name, cmo_name, 
+     &        length, irank, ierror)
+
+            cmo_get_length_c = ierror
           end function
 
 ! ================================================================ !
