@@ -1,4 +1,7 @@
-# set(CMAKE_Fortran_COMPILER "C:/Program Files (x86)/IntelSWTools/parallel_studio_xe_2020.4.912/compilers_and_libraries_2020/windows/bin/intel64/ifort.exe")
+message(STATUS "==========================================")
+message(STATUS "============Configuring LaGriT============")
+message(STATUS "==========================================")
+
 cmake_minimum_required(VERSION 3.12)
 
 project(
@@ -116,7 +119,7 @@ file(
 add_library(
     ${LIB}
     SHARED
-    ${SRC_ROOT}/lg_interface/interface.F
+    ${SRC_ROOT}/lg_interface/interface2.F
     ${SRC_UTIL_FILES}
     ${SRC_CORE_FILES}
 )
